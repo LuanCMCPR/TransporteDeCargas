@@ -1,11 +1,15 @@
 CC = gcc
 CFLAGS = -Wall -g
 NOME = transporte
+OBJS = libAux.o transporte.o
+all: $(OBJS)
+	$(CC) $(OBJS) -o $(NOME)
 
-all: $(NOME)
+transporte.o: transporte.c libAux.h
+	$(CC) $(CFLAGS) -c transporte.c
 
-programa:
-	$(CC) $(CFLAGS) $(NOME).c -o $(NOME)
+libAux.o: libAux.c libAux.h
+	$(CC) $(CFLAGS) -c libAux.c
 
 clean:
 	rm -f *.o
