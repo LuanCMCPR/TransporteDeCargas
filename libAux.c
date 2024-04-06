@@ -77,46 +77,81 @@ void leDados(int *m, int *n, int *p, int *q, int *k, int *qtdRotaOrigem, struct 
 void produzModelagemLP(int m, int n, int p, int q, int k, int qtdRotaOrigem, struct rota_t *rota, struct pacote_t *pacote)
 {
     // Função Objetivo
+    int qtdRota = qtdRotaOrigem;
     printf("max: ");
     for(int i = 0; i < m; i++)
     {
         if(rota[i].origem == 1 )
         {
-            if(qtdRotaOrigem == 1)
+            if(qtdRota == 1)
                 printf("%dx%d%d", p, 1, rota[i].destino);
             else
                 printf("%dx%d%d + ", p, 1, rota[i].destino);
-            qtdRotaOrigem--;
+            qtdRota--;
         }
     }
     for(int i = 0; i < q; i++)
         printf(" - %dy%d", pacote[i].custo, i+1);
-    printf(";\n");
+    printf(";\n\n");
     
-
+    
     // Restrições de capacidade
     for(int i = 0; i < m; i++)
         printf("- %d <= x%d%d <= %d;\n", rota[i].capacidade, rota[i].origem, rota[i].destino, rota[i].capacidade);
+    printf("\n");
 
+    qtdRota = qtdRotaOrigem;
     // Restrições de fluxo
-    // for(int i = 1; i < m; i++)
-    // {
-    //     for(int j = 1; j < m; j++)
-    //     {
-    //         if(i != j)
-    //         {
-    //             if(j != m-1)
-    //             {
-    //                 printf("x%d%d + ", rota[j].origem, rota[j].destino);
-    //             }
-    //             else
-    //             {
-    //                 printf("x%d%d ", rota[j].origem, rota[j].destino);
-    //                 printf("= ");
-    //             }
-    //         }
-    //     }
-    // }
+    for(int i = 0; i < m; i++)
+    {
+        if(rota[i].origem == 1 && rota[i].flagUsada == 0)
+        {
+            rota[i].flagUsada = 1;
+            printf("x%d%d ", rota[i].origem, rota[i].destino);
+        }
+
+        for(int j = 0; j < m; j++)
+        {
+            if(i != j)
+                if(rota[j].destino == rota[i].destino)
+                {
+                    if(rota[j].flagUsada != 1)
+                        printf("+ x%d%d ", rota[j].origem, rota[j].destino);
+                }
+        }
+
+        if(qtdRota > 0)
+        {
+            printf("= ");
+            
+            for(int j = 0; j < m; j++)
+            {
+                if(i != j)
+                    if(rota[j].origem == rota[i].destino)
+                    {
+                        if(rota[j].flagUsada != 1)
+                        {
+                            printf("x%d%d + ", rota[j].origem, rota[j].destino);
+                            if(rota[j].destino == n)
+                                rota[j].flagUsada = 1;
+                        }
+                    }
+            }
+            printf("0;\n");
+        }
+        qtdRota--;
+    }
+    printf("\n");
+
+    // Faz modulo de xij
+    for(int i = 0; i < m; i++)
+    {
+        printf("t%d%d >= 0;\n", rota[i].origem, rota[i].destino);
+        printf("t%d%d >= x%d%d;\n", rota[i].origem, rota[i].destino, rota[i].origem, rota[i].destino);
+        printf("t%d%d >= -x%d%d;\n", rota[i].origem, rota[i].destino, rota[i].origem, rota[i].destino);
+    }
+    printf("\n");
+
 
     // Restrições de recursos    
     for(int i = 0; i < k; i++)
@@ -125,11 +160,11 @@ void produzModelagemLP(int m, int n, int p, int q, int k, int qtdRotaOrigem, str
         {
             if(j != m-1)
             {
-                printf("%dx%d%d + ", rota[j].recursos[i], rota[j].origem, rota[j].destino);
+                printf("%dt%d%d + ", rota[j].recursos[i], rota[j].origem, rota[j].destino);
             }
             else
             {
-                printf("%dx%d%d ", rota[j].recursos[i], rota[j].origem, rota[j].destino);
+                printf("%dt%d%d ", rota[j].recursos[i], rota[j].origem, rota[j].destino);
                 printf("<= ");
             }
         }
@@ -142,7 +177,7 @@ void produzModelagemLP(int m, int n, int p, int q, int k, int qtdRotaOrigem, str
         }
         printf(";\n"); 
     }
-
+    printf("\n");
 
     // Restrições de não negatividade
     for(int i = 1; i < q+1; i++)
