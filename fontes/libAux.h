@@ -22,5 +22,8 @@ void leDados(int *m, int *n, int *p, int *q, int *k, int *qtdRotaOrigem, struct 
 /* Função para imprimir a modelagem do problema linear */
 void produzModelagemLP(int m, int n, int p, int q, int k, int qtdRotaOrigem, struct rota_t *rota, struct pacote_t *pacote);
 
+/* Função para imprimir a modelagem do problema linear para um arquivo */
+void produzModelagemLPArquivo(int m, int n, int p, int q, int k, int qtdRotaOrigem, struct rota_t *rota, struct pacote_t *pacote, char *nomeArquivo);
+
 /* Função para liberar memória alocada */
 void modoUso(char *nomePrograma);

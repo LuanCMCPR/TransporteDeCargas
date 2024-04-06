@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "libAux.h"
+#include "fontes/libAux.h"
 
 
 int main(int argc, char *argv[])
@@ -19,7 +19,13 @@ int main(int argc, char *argv[])
     leDados(&m, &n, &p, &q, &k, &qtdRotaOrigem, &rota, &pacote);
 
     // Produzir modelagem do problema linear
-    produzModelagemLP(m, n, p, q, k, qtdRotaOrigem, rota, pacote);
+    if(argc == 3 && argv[1][1] == 'f') 
+    {
+        produzModelagemLPArquivo(m, n, p, q, k, qtdRotaOrigem, rota, pacote, argv[2]);
+    }
+    else
+        produzModelagemLP(m, n, p, q, k, qtdRotaOrigem, rota, pacote);
+
     
     return 0;    
 }

@@ -41,6 +41,8 @@ void leDados(int *m, int *n, int *p, int *q, int *k, int *qtdRotaOrigem, struct 
         // ENTRADA - Ler os recursos de cada rota
         for(int j = 0; j < *k; j++)
             fscanf(stdin, "%d", &((*rota)[i].recursos[j]));
+        
+        (*rota)[i].flagUsada = 0;
     }
 
     // Qtd de rotas com origem em 1
@@ -100,30 +102,30 @@ void produzModelagemLP(int m, int n, int p, int q, int k, int qtdRotaOrigem, str
         printf("- %d <= x%d%d <= %d;\n", rota[i].capacidade, rota[i].origem, rota[i].destino, rota[i].capacidade);
     printf("\n");
 
-    qtdRota = qtdRotaOrigem;
     // Restrições de fluxo
     for(int i = 0; i < m; i++)
     {
-        if(rota[i].origem == 1 && rota[i].flagUsada == 0)
+        if(rota[i].flagUsada == 0)
         {
             rota[i].flagUsada = 1;
             printf("x%d%d ", rota[i].origem, rota[i].destino);
-        }
-
-        for(int j = 0; j < m; j++)
-        {
-            if(i != j)
-                if(rota[j].destino == rota[i].destino)
-                {
-                    if(rota[j].flagUsada != 1)
-                        printf("+ x%d%d ", rota[j].origem, rota[j].destino);
-                }
-        }
-
-        if(qtdRota > 0)
-        {
-            printf("= ");
             
+
+            for(int j = 0; j < m; j++)
+            {
+                if(i != j)
+                    if(rota[j].destino == rota[i].destino)
+                    {
+                        if(rota[j].flagUsada != 1)
+                        {
+                            rota[j].flagUsada = 1;
+                            printf("+ x%d%d ", rota[j].origem, rota[j].destino);
+                        }
+                    }
+            }
+
+            printf("= ");
+
             for(int j = 0; j < m; j++)
             {
                 if(i != j)
@@ -139,7 +141,6 @@ void produzModelagemLP(int m, int n, int p, int q, int k, int qtdRotaOrigem, str
             }
             printf("0;\n");
         }
-        qtdRota--;
     }
     printf("\n");
 
@@ -182,6 +183,169 @@ void produzModelagemLP(int m, int n, int p, int q, int k, int qtdRotaOrigem, str
     // Restrições de não negatividade
     for(int i = 1; i < q+1; i++)
         printf("y%d >= 0;\n", i);
+
+}
+
+/* Função para imprimir a modelagem do problema linear */
+void produzModelagemLPArquivo(int m, int n, int p, int q, int k, int qtdRotaOrigem, struct rota_t *rota, struct pacote_t *pacote, char *nomeArquivo)
+{
+    FILE *arq;
+    arq = fopen(nomeArquivo, "w");
+    if(arq == NULL)
+    {
+        fprintf(stderr, "Erro ao abrir arquivo\n");
+        exit(ERRLEITURA);
+    }
+
+    // Função Objetivo
+    int qtdRota = qtdRotaOrigem;
+    printf("max: ");
+    fprintf(arq,"max: ");
+    for(int i = 0; i < m; i++)
+    {
+        if(rota[i].origem == 1 )
+        {
+            if(qtdRota == 1)
+            {
+                printf("%dx%d%d", p, 1, rota[i].destino);
+                fprintf(arq,"%dx%d%d", p, 1, rota[i].destino);
+            }
+            else
+            {
+                printf("%dx%d%d + ", p, 1, rota[i].destino);
+                fprintf(arq,"%dx%d%d + ", p, 1, rota[i].destino);
+            }
+            qtdRota--;
+        }
+    }
+    for(int i = 0; i < q; i++)
+    {
+        printf(" - %dy%d", pacote[i].custo, i+1);
+        fprintf(arq," - %dy%d", pacote[i].custo, i+1);
+    }
+    printf(";\n\n");
+    fprintf(arq,";\n\n");
+    
+    
+    // Restrições de capacidade
+    for(int i = 0; i < m; i++)
+    {
+        printf("- %d <= x%d%d <= %d;\n", rota[i].capacidade, rota[i].origem, rota[i].destino, rota[i].capacidade);
+        fprintf(arq,"- %d <= x%d%d <= %d;\n", rota[i].capacidade, rota[i].origem, rota[i].destino, rota[i].capacidade);
+    }
+    printf("\n");
+    fprintf(arq,"\n");
+
+    qtdRota = qtdRotaOrigem;
+    // Restrições de fluxo
+    for(int i = 0; i < m; i++)
+    {
+        if(rota[i].origem == 1 && rota[i].flagUsada == 0)
+        {
+            rota[i].flagUsada = 1;
+            printf("x%d%d ", rota[i].origem, rota[i].destino);
+            fprintf(arq,"x%d%d ", rota[i].origem, rota[i].destino);
+        }
+
+        for(int j = 0; j < m; j++)
+        {
+            if(i != j)
+                if(rota[j].destino == rota[i].destino)
+                {
+                    if(rota[j].flagUsada != 1)
+                    {
+                        printf("+ x%d%d ", rota[j].origem, rota[j].destino);
+                        fprintf(arq,"+ x%d%d ", rota[j].origem, rota[j].destino);
+                    }
+                }
+        }
+
+        if(qtdRota > 0)
+        {
+            printf("= ");
+            fprintf(arq,"= ");
+            
+            for(int j = 0; j < m; j++)
+            {
+                if(i != j)
+                    if(rota[j].origem == rota[i].destino)
+                    {
+                        if(rota[j].flagUsada != 1)
+                        {
+                            printf("x%d%d + ", rota[j].origem, rota[j].destino);
+                            fprintf(arq,"x%d%d + ", rota[j].origem, rota[j].destino);
+                            if(rota[j].destino == n)
+                                rota[j].flagUsada = 1;
+                        }
+                    }
+            }
+            printf("0;\n");
+            fprintf(arq,"0;\n");
+        }
+        qtdRota--;
+    }
+    printf("\n");
+    fprintf(arq,"\n");
+
+    // Faz modulo de xij
+    for(int i = 0; i < m; i++)
+    {
+        printf("t%d%d >= 0;\n", rota[i].origem, rota[i].destino);
+        printf("t%d%d >= x%d%d;\n", rota[i].origem, rota[i].destino, rota[i].origem, rota[i].destino);
+        printf("t%d%d >= -x%d%d;\n", rota[i].origem, rota[i].destino, rota[i].origem, rota[i].destino);
+        fprintf(arq,"t%d%d >= 0;\n", rota[i].origem, rota[i].destino);
+        fprintf(arq,"t%d%d >= x%d%d;\n", rota[i].origem, rota[i].destino, rota[i].origem, rota[i].destino);
+        fprintf(arq,"t%d%d >= -x%d%d;\n", rota[i].origem, rota[i].destino, rota[i].origem, rota[i].destino);
+    }
+    printf("\n");
+    fprintf(arq,"\n");
+
+
+    // Restrições de recursos    
+    for(int i = 0; i < k; i++)
+    {
+        for(int j = 0; j < m; j++)
+        {
+            if(j != m-1)
+            {
+                printf("%dt%d%d + ", rota[j].recursos[i], rota[j].origem, rota[j].destino);
+                fprintf(arq,"%dt%d%d + ", rota[j].recursos[i], rota[j].origem, rota[j].destino);
+            }
+            else
+            {
+                printf("%dt%d%d ", rota[j].recursos[i], rota[j].origem, rota[j].destino);
+                printf("<= ");
+                fprintf(arq,"%dt%d%d ", rota[j].recursos[i], rota[j].origem, rota[j].destino);
+                fprintf(arq,"<= ");
+            }
+        }
+        for(int j = 0; j < q; j++)
+        {
+            if(j != q-1)
+            {
+                printf("%dy%d + ", pacote[j].recursos[i], j+1);
+                fprintf(arq,"%dy%d + ", pacote[j].recursos[i], j+1);
+            }
+            else
+            {
+                printf("%dy%d", pacote[j].recursos[i], j+1);
+                fprintf(arq,"%dy%d", pacote[j].recursos[i], j+1);
+            }
+        }
+        printf(";\n");
+        fprintf(arq,";\n"); 
+    }
+    printf("\n");
+    fprintf(arq,"\n");
+
+    // Restrições de não negatividade
+    for(int i = 1; i < q+1; i++)
+    {
+        printf("y%d >= 0;\n", i);
+        fprintf(arq,"y%d >= 0;\n", i);
+    }
+
+    fclose(arq);
 
 }
 
