@@ -15,7 +15,7 @@ struct pacote_t
 {
     int *recursos;
     int custo;
-} pacote_t;
+};
 
 /* Função para ler os dados de entrada */
 void leDados(int *m, int *n, int *p, int *q, int *k, int *qtdRotaOrigem, struct rota_t **rota, struct pacote_t **pacote);
