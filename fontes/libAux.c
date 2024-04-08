@@ -129,6 +129,7 @@ void produzModelagemLP(int m, int n, int p, int q, int k, int qtdRotaOrigem, str
             for(int j = 0; j < m; j++)
             {
                 if(i != j)
+                {
                     if(rota[j].origem == rota[i].destino)
                     {
                         if(rota[j].flagUsada != 1)
@@ -138,6 +139,7 @@ void produzModelagemLP(int m, int n, int p, int q, int k, int qtdRotaOrigem, str
                                 rota[j].flagUsada = 1;
                         }
                     }
+                }
             }
             printf("0;\n");
         }
@@ -147,7 +149,6 @@ void produzModelagemLP(int m, int n, int p, int q, int k, int qtdRotaOrigem, str
     // Faz modulo de xij
     for(int i = 0; i < m; i++)
     {
-        printf("t%d%d >= 0;\n", rota[i].origem, rota[i].destino);
         printf("t%d%d >= x%d%d;\n", rota[i].origem, rota[i].destino, rota[i].origem, rota[i].destino);
         printf("t%d%d >= -x%d%d;\n", rota[i].origem, rota[i].destino, rota[i].origem, rota[i].destino);
     }
@@ -176,11 +177,13 @@ void produzModelagemLP(int m, int n, int p, int q, int k, int qtdRotaOrigem, str
             else
                 printf("%dy%d", pacote[j].recursos[i], j+1);
         }
-        printf(";\n"); 
+        printf(";\n");
     }
     printf("\n");
 
     // Restrições de não negatividade
+    for(int i = 0; i < m; i++)
+        printf("t%d%d >= 0;\n", rota[i].origem, rota[i].destino);
     for(int i = 1; i < q+1; i++)
         printf("y%d >= 0;\n", i);
 
@@ -236,38 +239,37 @@ void produzModelagemLPArquivo(int m, int n, int p, int q, int k, int qtdRotaOrig
     printf("\n");
     fprintf(arq,"\n");
 
-    qtdRota = qtdRotaOrigem;
-    // Restrições de fluxo
+
+        // Restrições de fluxo
     for(int i = 0; i < m; i++)
     {
-        if(rota[i].origem == 1 && rota[i].flagUsada == 0)
+        if(rota[i].flagUsada == 0)
         {
             rota[i].flagUsada = 1;
             printf("x%d%d ", rota[i].origem, rota[i].destino);
-            fprintf(arq,"x%d%d ", rota[i].origem, rota[i].destino);
-        }
+            fprintf(arq, "x%d%d ", rota[i].origem, rota[i].destino);
 
-        for(int j = 0; j < m; j++)
-        {
-            if(i != j)
-                if(rota[j].destino == rota[i].destino)
-                {
-                    if(rota[j].flagUsada != 1)
-                    {
-                        printf("+ x%d%d ", rota[j].origem, rota[j].destino);
-                        fprintf(arq,"+ x%d%d ", rota[j].origem, rota[j].destino);
-                    }
-                }
-        }
-
-        if(qtdRota > 0)
-        {
-            printf("= ");
-            fprintf(arq,"= ");
-            
             for(int j = 0; j < m; j++)
             {
                 if(i != j)
+                    if(rota[j].destino == rota[i].destino)
+                    {
+                        if(rota[j].flagUsada != 1)
+                        {
+                            rota[j].flagUsada = 1;
+                            printf("+ x%d%d ", rota[j].origem, rota[j].destino);
+                            fprintf(arq, "+ x%d%d ", rota[j].origem, rota[j].destino);
+                        }
+                    }
+            }
+
+            printf("= ");
+            fprintf(arq, "= ");
+
+            for(int j = 0; j < m; j++)
+            {
+                if(i != j)
+                {
                     if(rota[j].origem == rota[i].destino)
                     {
                         if(rota[j].flagUsada != 1)
@@ -278,11 +280,11 @@ void produzModelagemLPArquivo(int m, int n, int p, int q, int k, int qtdRotaOrig
                                 rota[j].flagUsada = 1;
                         }
                     }
+                }
             }
             printf("0;\n");
-            fprintf(arq,"0;\n");
+            fprintf(arq, "0;\n");
         }
-        qtdRota--;
     }
     printf("\n");
     fprintf(arq,"\n");
@@ -290,10 +292,8 @@ void produzModelagemLPArquivo(int m, int n, int p, int q, int k, int qtdRotaOrig
     // Faz modulo de xij
     for(int i = 0; i < m; i++)
     {
-        printf("t%d%d >= 0;\n", rota[i].origem, rota[i].destino);
         printf("t%d%d >= x%d%d;\n", rota[i].origem, rota[i].destino, rota[i].origem, rota[i].destino);
         printf("t%d%d >= -x%d%d;\n", rota[i].origem, rota[i].destino, rota[i].origem, rota[i].destino);
-        fprintf(arq,"t%d%d >= 0;\n", rota[i].origem, rota[i].destino);
         fprintf(arq,"t%d%d >= x%d%d;\n", rota[i].origem, rota[i].destino, rota[i].origem, rota[i].destino);
         fprintf(arq,"t%d%d >= -x%d%d;\n", rota[i].origem, rota[i].destino, rota[i].origem, rota[i].destino);
     }
@@ -338,6 +338,12 @@ void produzModelagemLPArquivo(int m, int n, int p, int q, int k, int qtdRotaOrig
     printf("\n");
     fprintf(arq,"\n");
 
+    for(int i = 0; i < m; i++)
+    {
+        printf("t%d%d >= 0;\n", rota[i].origem, rota[i].destino);
+        fprintf(arq,"t%d%d >= 0;\n", rota[i].origem, rota[i].destino);
+    }
+
     // Restrições de não negatividade
     for(int i = 1; i < q+1; i++)
     {
@@ -349,12 +355,11 @@ void produzModelagemLPArquivo(int m, int n, int p, int q, int k, int qtdRotaOrig
 
 }
 
-/* Função para liberar memória alocada */
+/* Função para mostrar o uso */
 void modoUso(char *nomePrograma)
 {
-    fprintf(stderr, "Uso: %s < dadosEntrada.txt | lp_solve\n", nomePrograma);
-    fprintf(stderr, "Uso: %s | lp_solve\n", nomePrograma);
-    fprintf(stderr, "Uso: %s -f nomeArquivo.lp < dadosEntrada.txt | lp_solve\n", nomePrograma);
-    fprintf(stderr, "Uso: %s -f nomeArquivo.lp | lp_solve\n", nomePrograma);
-    exit(ERRLEITURA);
+    fprintf(stderr, "Uso: ./%s < dadosEntrada.txt | lp_solve\n", nomePrograma);
+    fprintf(stderr, "Uso: ./%s | lp_solve\n", nomePrograma);
+    fprintf(stderr, "Uso: ./%s -f nomeArquivo.lp < dadosEntrada.txt | lp_solve\n", nomePrograma);
+    fprintf(stderr, "Uso: ./%s -f nomeArquivo.lp | lp_solve\n", nomePrograma);
 }

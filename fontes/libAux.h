@@ -1,5 +1,6 @@
 #define ERRLEITURA -1
 #define ERRALOCA -2
+#define ERRENTRADA -3
 
 struct rota_t
 {
