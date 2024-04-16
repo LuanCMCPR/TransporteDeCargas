@@ -4,6 +4,8 @@ NOME = transporte
 TEAM = lcmc20-lmmm20
 OBJS = libAux.o transporte.o
 DIR = fontes/
+RELATORIO = "Relatório - Trabalho 1.pdf"
+
 all: $(OBJS)
 	$(CC) $(OBJS) -o $(NOME)
 
@@ -14,7 +16,7 @@ libAux.o: $(DIR)libAux.c $(DIR)libAux.h
 	$(CC) $(CFLAGS) -c $(DIR)libAux.c
 
 compact:
-	tar -cvzf $(TEAM).tar.gz fontes exemplos makefile
+	tar -cvzf $(TEAM).tar.gz fontes exemplos makefile $(RELATORIO)
 
 clean:
 	rm -f *.o 

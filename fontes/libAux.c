@@ -107,6 +107,7 @@ void produzModelagemLP(int m, int n, int p, int q, int k, int qtdRotaOrigem, str
     {
         if(rota[i].flagUsada == 0)
         {
+            printf("0 + ");
             rota[i].flagUsada = 1;
             printf("x%d%d ", rota[i].origem, rota[i].destino);
             
@@ -245,6 +246,8 @@ void produzModelagemLPArquivo(int m, int n, int p, int q, int k, int qtdRotaOrig
     {
         if(rota[i].flagUsada == 0)
         {
+            printf("0 + ");
+            fprintf(arq, "0 + ");
             rota[i].flagUsada = 1;
             printf("x%d%d ", rota[i].origem, rota[i].destino);
             fprintf(arq, "x%d%d ", rota[i].origem, rota[i].destino);
